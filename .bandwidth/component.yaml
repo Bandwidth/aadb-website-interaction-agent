@@ -1,0 +1,19 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  schemaVersion: v1.0.0
+  name: aadb-website-interaction-agent
+  description: Forked from https://github.com/MinorJerry/WebVoyager
+  annotations:
+    github.com/project-slug: Bandwidth/aadb-website-interaction-agent
+  organization: BW
+  costCenter: undefined
+  platformType: N/A
+  buildPlatform: GitHub Actions
+spec:
+  type: Library
+  owner: github/band-advanced-analytics
+  lifecycle: Prototype
+  dependsOn:
+    - resource:platform/GitHub Actions
+    - resource:cost-center/undefined
