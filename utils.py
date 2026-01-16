@@ -6,40 +6,46 @@ import time
 import logging
 import numpy as np
 from PIL import Image
-
-def resize_image(image_path):
-    image = Image.open(image_path)
-    width, height = image.size
-
-    if min(width, height) < 512:
-        return image
-    elif width < height:
-        new_width = 512
-        new_height = int(height * (new_width / width))
-    else:
-        new_height = 512
-        new_width = int(width * (new_height / height))
-
-    resized_image = image.resize((new_width, new_height), Image.LANCZOS)
-    resized_image.save(image_path)
-    # return resized_image
-
+from selenium import webdriver
 
 # base64 encoding
 # Code from OpenAI Document
-def encode_image(image_path):
+def encode_image(image_path: str) -> str:
+    """
+    Processes an image to return the utf-8 decoded string of an image file in base64 format.
+
+    Args:
+        image_path (str): The file path to the image to be encoded.
+
+    Returns:
+        str: The base64 encoded string of the image.
+    """
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 
 # interact with webpage and add rectangles on elements
-def get_web_element_rect(browser, fix_color=True):
+def get_web_element_rect(browser: webdriver.Chrome, fix_color: bool=True) -> tuple[list, list, str]:
+    """
+    Gets the rectangles of web elements on a webpage using JavaScript executed in the browser.
+    
+    Args:
+        browser (webdriver.Chrome): The Selenium WebDriver instance controlling the browser.
+        fix_color (bool): Whether to use a fixed color for the rectangles or random colors.
+    
+    Returns:
+        tuple: A tuple containing:
+            - list: A list of rectangle elements drawn on the webpage.
+            - list: A list of web elements corresponding to the rectangles.
+            - str: A formatted string of element texts with their indices.
+    """
     if fix_color:
         selected_function = "getFixedColor"
         # color_you_like = '#5210da'
     else:
         selected_function = "getRandomColor"
 
+    # This script draws rectangles around interactive elements and labels them with indices.
     js_script = """
         let labels = [];
 
@@ -174,6 +180,8 @@ def get_web_element_rect(browser, fix_color=True):
 
     # format_ele_text = [f"[{web_ele_id}]: \"{items_raw[web_ele_id]['text']}\";" for web_ele_id in range(len(items_raw)) if items_raw[web_ele_id]['text'] ]
     format_ele_text = []
+    
+    # Loop through each web element and annotate based on conditions
     for web_ele_id in range(len(items_raw)):
         label_text = items_raw[web_ele_id]['text']
         ele_tag_name = items_raw[web_ele_id]['element'].tag_name
@@ -206,8 +214,18 @@ def get_web_element_rect(browser, fix_color=True):
     format_ele_text = '\t'.join(format_ele_text)
     return rects, [web_ele['element'] for web_ele in items_raw], format_ele_text
 
+#TODO: Replace patterns here with those configured in run.py
+def extract_information(text: str, patterns: dict) -> tuple[str, dict]:
+    """
+    Extracts decision from model on what function to do
 
-def extract_information(text):
+    Args:
+        text (str): Response text from the model
+        patterns (dict): Dictionary of regex patterns to match different actions.
+
+    Returns:
+        tuple[str, dict]: A tuple containing the action key and a dictionary of extracted parameters.
+    """
     patterns = {
         "click": r"Click \[?(\d+)\]?",
         "type": r"Type \[?(\d+)\]?[; ]+\[?(.[^\]]*)\]?",
@@ -218,7 +236,8 @@ def extract_information(text):
         "google": r"^Google",
         "answer": r"ANSWER[; ]+\[?(.[^\]]*)\]?"
     }
-
+    
+    # Determine what action we need to take and what parameters to use
     for key, pattern in patterns.items():
         match = re.search(pattern, text)
         if match:
@@ -230,11 +249,21 @@ def extract_information(text):
     return None, None
 
 
-def clip_message(msg, max_img_num):
+def clip_message(msg_hist: list, max_img_num: int) -> list:
+    """
+    Clip the history to only contain the last max_img_num of history
+
+    Args:
+        msg_hist (list): chat message history
+        max_img_num (int): max number number of steps to keep in history
+
+    Returns:
+        list: Clipped chat message history containing only the last max_img_num user messages.
+    """
     clipped_msg = []
     img_num = 0
-    for idx in range(len(msg)):
-        curr_msg = msg[len(msg) - 1 - idx]
+    for idx in range(len(msg_hist)):
+        curr_msg = msg_hist[len(msg_hist) - 1 - idx]
         if curr_msg['role'] != 'user':
             clipped_msg = [curr_msg] + clipped_msg
         else:
@@ -252,7 +281,17 @@ def clip_message(msg, max_img_num):
     return clipped_msg
 
 
-def clip_message_and_obs(msg, max_img_num):
+def clip_message_and_obs(msg: list, max_img_num: int) -> list:
+    """
+    Clips the message and operation history
+
+    Args:
+        msg (list): chat message history
+        max_img_num (int): max number number of steps to keep in history
+
+    Returns:
+        list: Clipped chat message history containing only the last max_img_num user messages.
+    """
     clipped_msg = []
     img_num = 0
     for idx in range(len(msg)):
@@ -276,7 +315,7 @@ def clip_message_and_obs(msg, max_img_num):
     return clipped_msg
 
 
-def clip_message_and_obs_text_only(msg, max_tree_num):
+def clip_message_and_obs_text_only(msg: list, max_tree_num: int) -> list:
     clipped_msg = []
     tree_num = 0
     for idx in range(len(msg)):

@@ -1,0 +1,37 @@
+{
+    "click": {
+        "pattern": "Click \\[?(\\d+)\\]?",
+        "description": "Click a Web Element.",
+        "response_format": "Click [Numerical_Label]"
+    },
+    "type": {
+        "pattern": "Type \\[?(\\d+)\\]?[; ]+\\[?(.[^\\]]*)\\]?",
+        "description": "Delete existing content in a textbox and then type content.",
+        "response_format": "Type [Numerical_Label]; [Content]"
+    },
+    "scroll": {
+        "pattern": "Scroll \\[?(\\d+|WINDOW)\\]?[; ]+\\[?(up|down)\\]?",
+        "description": "Scroll up or down. Multiple scrolls are allowed to browse the webpage. Pay attention!! The default scroll is the whole window. If the scroll widget is located in a certain area of the webpage, then you have to specify a Web Element in that area. I would hover the mouse there and then scroll.",
+        "response_format": "Scroll [Numerical_Label or WINDOW]; [up or down]"
+    },
+    "wait": {
+        "pattern": "^Wait",
+        "description": "Wait. Typically used to wait for unfinished webpage processes, with a duration of 5 seconds.",
+        "response_format": "Wait"
+    },
+    "goback": {
+        "pattern": "^GoBack",
+        "description": "Go back, returning to the previous webpage.",
+        "response_format": "GoBack"
+    },
+    "google": {
+        "pattern": "^Google",
+        "description": "Google, directly jump to the Google search page. When you can't find information in some websites, try starting over with Google.",
+        "response_format": "Google"
+    },
+    "answer": {
+        "pattern": "ANSWER[; ]+\\[?(.[^\\]]*)\\]?",
+        "description": "Answer. This action should only be chosen when all questions in the task have been solved.",
+        "response_format": "ANSWER; [content]"
+    }
+}

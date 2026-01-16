@@ -13,11 +13,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
 from prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_TEXT_ONLY
-from openai import OpenAI
 from utils import get_web_element_rect, encode_image, extract_information, print_message,\
-    get_webarena_accessibility_tree, get_pdf_retrieval_ans_from_assistant, clip_message_and_obs, clip_message_and_obs_text_only
+     get_pdf_retrieval_ans_from_assistant, clip_message_and_obs, clip_message_and_obs_text_only
 
-
+#TODO: Likely need to change this or just pass in a logger object
 def setup_logger(folder_path):
     log_file_path = os.path.join(folder_path, 'agent.log')
 
